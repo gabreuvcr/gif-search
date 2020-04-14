@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:gif_search/pages/gif_page.dart';
+import 'package:share/share.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -11,6 +13,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
 
   String _search = "";
+  TextEditingController _textController = TextEditingController();
   int _offset = 0;
 
   Future<Map> _getGifs() async {
@@ -39,10 +42,21 @@ class _HomePageState extends State<HomePage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
             child: TextField(
+              controller: _textController,
               autocorrect: false,
               cursorColor: Colors.black,
               style: TextStyle(color: Colors.black),
               decoration: InputDecoration(
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.close, color: _textController.text.length > 0 ? Color.fromRGBO(166, 166, 166, 1) : Colors.white, size: 18,),
+                  onPressed: () {
+                    setState(() {
+                      _search = "";
+                      _textController.clear();
+                      _offset = 0;
+                    });
+                  },
+                ),
                 hasFloatingPlaceholder: false,
                 filled: true,
                 fillColor: Colors.white,
@@ -126,6 +140,14 @@ class _HomePageState extends State<HomePage> {
               height: 300.0,
               fit: BoxFit.cover
             ),
+            onTap: () {
+              Navigator.push(context, 
+                MaterialPageRoute(builder: (context) => GifPage(gifs[index]))
+              );
+            },
+            onLongPress: () {
+              Share.share(gifs[index]["images"]["fixed_height"]["url"]);
+            },
           );
         }
         else {
