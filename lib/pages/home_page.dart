@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:gif_search/pages/gif_page.dart';
 import 'package:share/share.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -135,10 +136,11 @@ class _HomePageState extends State<HomePage> {
       itemBuilder: (context, index) {
         if(_search == "" || index < gifs.length) {
           return GestureDetector(
-            child: Image.network(
-              gifs[index]["images"]["fixed_height"]["url"],
+            child: FadeInImage.memoryNetwork(
+              placeholder: kTransparentImage, 
+              image: gifs[index]["images"]["fixed_height"]["url"],
               height: 300.0,
-              fit: BoxFit.cover
+              fit: BoxFit.cover,
             ),
             onTap: () {
               Navigator.push(context, 
