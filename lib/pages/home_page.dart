@@ -10,13 +10,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
-  String _search;
+  String _search = "";
   int _offset = 0;
 
   Future<Map> _getGifs() async {
     http.Response response;
-    if(_search == null) {
-      response = await http.get("https://api.giphy.com/v1/gifs/trending?api_key=O3EGPU7udLi7JvhFpARVt0Ymnw0rYFpi&limit=25&rating=G");
+    if(_search == "") {
+      response = await http.get("https://api.giphy.com/v1/gifs/trending?api_key=O3EGPU7udLi7JvhFpARVt0Ymnw0rYFpi&limit=24&rating=G");
     }
     else {
       response = await http.get("https://api.giphy.com/v1/gifs/search?api_key=O3EGPU7udLi7JvhFpARVt0Ymnw0rYFpi&q=${_search}&limit=25&offset=${_offset}&rating=G&lang=en");
@@ -55,33 +55,42 @@ class _HomePageState extends State<HomePage> {
                   borderRadius: BorderRadius.circular(0)
                 )
               ),
+              onSubmitted: (text) {
+                setState(() {
+                  _search = text;
+                  _offset = 0;
+                });
+              },
             ),
           ),
           Expanded(
-            child: FutureBuilder(
-              future: _getGifs(),
-              builder: (context, snapshot) {
-                switch(snapshot.connectionState) {
-                  case ConnectionState.waiting:
-                  case ConnectionState.none:
-                    return Container(
-                      width: 200,
-                      height: 200,
-                      alignment: Alignment.center,
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        strokeWidth: 3.0,
-                      ),
-                    );
-                  default:
-                    if(snapshot.hasError) {
-                      return Container();
-                    }
-                    else {
-                      return _createGifTable(context, snapshot);
-                    }
+            child: Padding(
+              padding: const EdgeInsets.only(top: 15),
+              child: FutureBuilder(
+                future: _getGifs(),
+                builder: (context, snapshot) {
+                  switch(snapshot.connectionState) {
+                    case ConnectionState.waiting:
+                    case ConnectionState.none:
+                      return Container(
+                        width: 200,
+                        height: 200,
+                        alignment: Alignment.center,
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          strokeWidth: 3.0,
+                        ),
+                      );
+                    default:
+                      if(snapshot.hasError) {
+                        return Container();
+                      }
+                      else {
+                        return _createGifTable(context, snapshot);
+                      }
+                  }
                 }
-              }
+              ),
             ),
           ),
         ],
@@ -89,25 +98,57 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  int _getCount(List data) {
+    if(_search == "") {
+      return data.length;
+    }
+    else {
+      return data.length + 1;
+    }
+  }
+
   Widget _createGifTable(BuildContext context, AsyncSnapshot snapshot) {
     List<dynamic> gifs = snapshot.data["data"];
 
     return GridView.builder(
-      padding: EdgeInsets.fromLTRB(10, 15, 10, 10),
+      padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 10.0,
         mainAxisSpacing: 10.0,
       ),
-      itemCount: gifs.length,
+      itemCount: _getCount(gifs),
       itemBuilder: (context, index) {
-        return GestureDetector(
-          child: Image.network(
-            gifs[index]["images"]["fixed_height"]["url"],
-            height: 300.0,
-            fit: BoxFit.cover
-          ),
-        );
+        if(_search == "" || index < gifs.length) {
+          return GestureDetector(
+            child: Image.network(
+              gifs[index]["images"]["fixed_height"]["url"],
+              height: 300.0,
+              fit: BoxFit.cover
+            ),
+          );
+        }
+        else {
+          return Container(
+            child: GestureDetector(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(Icons.add, color: Colors.white, size: 55.0),
+                  Divider(height: 5.0),
+                  Text("More",
+                    style: TextStyle(color: Colors.white, fontSize: 17.0),
+                  )
+                ],
+              ),
+              onTap: () {
+                setState(() {
+                  _offset += 25;
+                });
+              },
+            ),
+          );
+        }
       }
     );
   }
