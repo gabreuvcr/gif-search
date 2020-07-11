@@ -23,7 +23,7 @@ class _HomePageState extends State<HomePage> {
       response = await http.get("https://api.giphy.com/v1/gifs/trending?api_key=O3EGPU7udLi7JvhFpARVt0Ymnw0rYFpi&limit=24&rating=G");
     }
     else {
-      response = await http.get("https://api.giphy.com/v1/gifs/search?api_key=O3EGPU7udLi7JvhFpARVt0Ymnw0rYFpi&q=${_search}&limit=25&offset=${_offset}&rating=G&lang=en");
+      response = await http.get("https://api.giphy.com/v1/gifs/search?api_key=O3EGPU7udLi7JvhFpARVt0Ymnw0rYFpi&q=$_search&limit=25&offset=$_offset&rating=G&lang=en");
     }
 
     return json.decode(response.body);
@@ -58,7 +58,7 @@ class _HomePageState extends State<HomePage> {
                     });
                   },
                 ),
-                hasFloatingPlaceholder: false,
+                floatingLabelBehavior: FloatingLabelBehavior.never,
                 filled: true,
                 fillColor: Colors.white,
                 labelText: "Search",
